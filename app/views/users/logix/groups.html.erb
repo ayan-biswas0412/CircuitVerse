@@ -65,6 +65,13 @@
         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
           <div class="groups-card groups-member-card">
             <div class="groups-member-card-details">
+              <%# show a logo if the group imported from an lms %>
+                <% if group.lmstype == "moodle" %>
+                  <div class="mini-button groups-mentor-card-view-mini-lmslogo">
+                    <%= image_tag("lms/moodle/moodle-rounded.png", alt: "View Group") %>
+                  </div>
+                <% end %>
+              <%# logo end %>
               <div class="groups-mentor-card-name groups-member-card-name"><%= group.name %></div>
               <p>Total Members: <%= group.group_members.count %></p>
             </div>
