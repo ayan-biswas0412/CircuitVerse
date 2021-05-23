@@ -39,8 +39,11 @@
             <h1>You can now submit your moodle assignments using CircuitVerse</h1><br>
             <p>From simple gates to complex sequential circuits, plot timing diagrams, automatic circuit generation, explore standard ICs, and much more</p>
             <div class="home-buttons-container justify-content-center">
-              <%# Implement the Grant Access Logic, onClick => from action call moodlegrantedpermissionupdate function %>
-              <a class="btn primary-button home-simulator-button" href='/#'>Grant Access to Moodle</a> &nbsp;
+              <%# ToDo: Implement the Grant Access Logic, onClick => from action call moodlegrantedpermissionupdate function %>
+              
+              <%= link_to '#', class: "btn primary-button home-simulator-button" do %>
+                Grant Access to Moodle
+              <% end %>
               
             </div>
           </div>

@@ -7,12 +7,8 @@ class MoodleauthController < ApplicationController
 
 
     def moodlegrantedpermissionupdate
-        if @user.update(profile_params)
-            redirect_to "/groups/"+params[:group_id]
-        end
+        #ToDo: After User.update(isMoodleGranted:true) => redirect_to "/groups/"+params[:group_id]
 
-        
-        
     end
 
 
