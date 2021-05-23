@@ -62,20 +62,22 @@
     <h4 class="submain-heading">GROUPS YOU'RE IN:</h4>
     <div class="row center-row">
       <% @user.groups.each do |group| %>
-        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-          <div class="groups-card groups-member-card">
-            <div class="groups-member-card-details">
-              <div class="groups-mentor-card-name groups-member-card-name"><%= group.name %></div>
-              <p>Total Members: <%= group.group_members.count %></p>
-            </div>
-            <div class="groups-mentor-card-buttons">
-              <%= link_to group, class: "mini-button groups-mentor-card-view-mini-button groups-member-card-button" do %>
-                <%= image_tag("SVGs/viewGroup.svg", alt: "View Group") %>
-                <span>View</span>
-              <% end %>
+        <% if group.lmstype == nil %>
+          <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+            <div class="groups-card groups-member-card">
+              <div class="groups-member-card-details">
+                <div class="groups-mentor-card-name groups-member-card-name"><%= group.name %></div>
+                <p>Total Members: <%= group.group_members.count %></p>
+              </div>
+              <div class="groups-mentor-card-buttons">
+                <%= link_to group, class: "mini-button groups-mentor-card-view-mini-button groups-member-card-button" do %>
+                  <%= image_tag("SVGs/viewGroup.svg", alt: "View Group") %>
+                  <span>View</span>
+                <% end %>
+              </div>
             </div>
           </div>
-        </div>
+        <% end %>
       <% end %>
     </div>
   <% end %>
