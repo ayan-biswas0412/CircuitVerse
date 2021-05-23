@@ -2,7 +2,6 @@
 class MoodleauthController < ApplicationController
     before_action :authenticate_user!
     before_action :check_grantaccess_and_redirect
-    before_action :set_user
     
 
 
@@ -24,14 +23,5 @@ class MoodleauthController < ApplicationController
                 
             end
 
-        end
-
-        def profile_params
-            params.permit(:isMoodleGranted)
-        end
-
-        def set_user
-            @profile = current_user
-            @user = User.find(params[:id])
         end
 end
