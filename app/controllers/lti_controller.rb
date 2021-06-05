@@ -3,10 +3,7 @@ class LtiController < ApplicationController
   def launch
     #If set, then hide the header and footer
     session[:isLTI]=true
-    if not Rails.configuration.lti_settings[params[:oauth_consumer_key]]
-      render :launch_error, status: 401
-      return
-    end
+    
     require 'oauth/request_proxy/action_controller_request'
     @provider = IMS::LTI::ToolProvider.new(
       params[:oauth_consumer_key],
