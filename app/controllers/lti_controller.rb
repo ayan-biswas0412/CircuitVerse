@@ -1,65 +1,58 @@
 class LtiController < ApplicationController
-    after_action :allow_iframe, only: [:launch]
+  before_action :set_group, only: %i[launch]
+  after_action :allow_iframe, only: %i[launch]
+  
   def launch
     #If set, then hide the header and footer
     session[:isLTI]=true
     
     require 'oauth/request_proxy/action_controller_request'
-    @provider = IMS::LTI::ToolProvider.new(
-      params[:oauth_consumer_key],
-      'FirstSecret', # hardcoded the secret
-      params
-    )
+    
+    if @group.present?
+      @provider = IMS::LTI::ToolProvider.new(
+        params[:oauth_consumer_key], ## moodle_key
+        @group.lti_token, ## the group's lti_token
+        params
+      )
 
-    if not @provider.valid_request?(request)
-      render :launch_error, status: 401
-      return
+      if not @provider.valid_request?(request)
+        render :launch_error, status: 401
+        return
+      end
+
+      @@launch_params=params;
+      email_from_lms = params[:lis_person_contact_email_primary] ## caches the email from the LMS
+      lms_type = params[:tool_consumer_info_product_family_code] ## caches type of lms like moodle/canvas
+      course_title_from_lms = params[:context_title] ## caches the course titile from lms
+
+      # implement the logic of fetch group by token and auth user without passsword
+      # get group from token  and we have to make a permanent toekn per group onClick
+      # if user is member of group then sign_in(:user) else send an email
+      user = User.find_by(email: email_from_lms)
+      if user.present?
+        sign_in(user)
+        lms_auth_success_notice = 'Logged in as '+email_from_lms+' via '+lms_type+' for course '+course_title_from_lms
+        redirect_to group_path(@group), notice: lms_auth_success_notice
+      end
+      
+      # if auth_success send to group page
+      ##checking need to be done if the user is part of the group or not
+      #redirect_to "/groups/#{@group.id}"  ## ideally to group page
+      
+      
+      
+      
+      
     end
-    @@launch_params=params;
-    email = params[:lis_person_contact_email_primary] ## caches the email from the LMS
-
-    #Request was valid, Now create a new user if the user does not exist
-    # @user = User.where(email: email).first
-    # if @user.blank?
-    #   @user = User.new(:username => email,
-    #                    :email => email,
-    #                    :password => email,
-    #                    :password_confirmation => email)
-    #   if !@user.save
-    #     puts @user.errors.full_messages.first
-    #   end
-    # end
-    # #Login the user and create his session.
-    # authorized_user = User.authenticate(email,email)
-    # session[:user_id] = authorized_user.id
-    #redirect the user to give quiz starting from question id 1
-    redirect_to "/"
-  end
-
-  def submitscore
-    @tp = IMS::LTI::ToolProvider.new(@@launch_params[:oauth_consumer_key],
-    Rails.configuration.lti_settings[@@launch_params[:oauth_consumer_key]],
-    @@launch_params)
-    # add extension
-    @tp.extend IMS::LTI::Extensions::OutcomeData::ToolProvider
-
-    if !@tp.outcome_service?
-      @message = "This tool wasn't lunched as an outcome service"
-      puts "This tool wasn't lunched as an outcome service"
-      render(:launch_error)
-    end
-
-    res = @tp.post_extended_replace_result!(score: params[:result])
-
-    if res.success?
-      puts "Score Submitted"
-    else
-      puts "Error during score submission"
-    end
-    redirect_to @@launch_params[:launch_presentation_return_url]
   end
 
   def allow_iframe
     response.headers.except! 'X-Frame-Options'
   end
+
+  private
+    def set_group
+      ## query db and check moodle_key is equal to group where @group.lti_token_key == moodle_key
+      @group = Group.select(:id,:lti_token).find_by(lti_token_key: params[:oauth_consumer_key])
+    end
 end
