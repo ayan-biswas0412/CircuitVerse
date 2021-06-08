@@ -34,18 +34,23 @@ class LtiController < ApplicationController
           sign_in(user)
           lms_auth_success_notice = 'Logged in as '+@email_from_lms+' via '+@lms_type+' for course '+@course_title_from_lms
           redirect_to group_path(@group), notice: lms_auth_success_notice # if auth_success send to group page
-        else # if the user is not a member of the group then we have to send mail
-          render :launch_error, status: 401 #notice has to be given
+        else # if the user is not a member of the group then add the user
+          sign_in(user)
+          user.group_members.create!(group: @group)
+          lms_after_group_addition_notice = "You have been successfully added to the "+@group.name+" group."
+          redirect_to group_path(@group), notice: lms_after_group_addition_notice
           return
         end
       else
         # if there is no such user in circuitverse, then we have to send mail
-        render :launch_error, status: 401 #notice has to be given
+        flash[:notice] = "You have no account associated with email "+@email_from_lms+", please create first and try again."
+        render :launch_error, status: 401 
         return
       end
     else
       #if there is no valid group present for the lti_token_key
-      render :launch_error, status: 401 #notice has to be given
+      flash[:notice] = "There is no group in CircuitVerse associated with your current LMS, Please ask your LMS Admin/Teacher to create one"
+      render :launch_error, status: 401
       return
     end
   end
@@ -57,7 +62,7 @@ class LtiController < ApplicationController
   private
     def set_group
       ## query db and check moodle_key is equal to group where @group.lti_token_key == moodle_key
-      @group = Group.select(:id,:mentor_id,:lti_token).find_by(lti_token_key: params[:oauth_consumer_key])
+      @group = Group.find_by(lti_token_key: params[:oauth_consumer_key])
     end
     
     def set_lti_params
