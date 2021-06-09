@@ -52,7 +52,6 @@ class LtiController < ApplicationController
   end
 
   private
-
     def set_group # query db and check lms_oauth_consumer_key is equal to group where @group.lti_token_key == moodle_key
       @group = Group.find_by(lti_token_key: params[:oauth_consumer_key])
     end
